@@ -86,7 +86,7 @@ local Planets = {
     }
 } 
 
-local SpecialLanders = {
+local Landers = {
     [5515926734] = {"LLAMA", "ToMoonRemote"}
 }
 
