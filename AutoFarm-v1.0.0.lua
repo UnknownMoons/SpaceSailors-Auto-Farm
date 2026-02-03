@@ -37,7 +37,7 @@ local hum = Char:WaitForChild("Humanoid")
 local root = Char:WaitForChild("HumanoidRootPart")
 
 local DefaultData = {
-    AutoFarm = false,
+    AutoFarm = true,
     CameFromPlanet = false
 }
 local MainData
