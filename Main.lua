@@ -5,7 +5,7 @@ if game.GameId ~= 1722988797 then
 end
 
 local http = game:GetService("HttpService")
-local FileName = "SS.JSON"
+local FileName = "Save.JSON"
 
 -- Função para carregar a lógica principal do Farm
 local Init = function()
@@ -71,7 +71,7 @@ end)
 local Main = UI:Tab{ Name = "Space Sailors" }
 
 -- CORREÇÃO AQUI: Mudado de Label para Section
-Main:Section{ Name = "Versão: 1.0.0 | Status: Ativo" }
+Main:Section{ Name = "Versão: 1.0.0 | Status: Active" }
 
 local Divider = Main:Divider{ Name = "Auto Farm" }
 
@@ -92,7 +92,7 @@ QuitDivider:Button{
    Callback = function()
        ScreenGui:Destroy()
        UI:Quit{
-           Message = "Desligando...",
+           Message = "Close",
            Length = 1
        }
    end
