@@ -1,13 +1,8 @@
-if not game:IsLoaded() then game.Loaded:Wait() end
-if game.GameId ~= 1722988797 then
-    warn("Not Space Sailors")
-    return
-end
-
 local HttpService = game:GetService("HttpService")
 local UIS = game:GetService("UserInputService")
 
 local FileName = "Save.JSON"
+local uiOpen = true
 
 local DefaultData = {
     AutoFarm = false,
@@ -156,6 +151,10 @@ OpenBtn.InputEnded:Connect(function(input)
 end)
 
 OpenBtn.MouseButton1Click:Connect(function()
+    uiOpen = not uiOpen
+    UI:SetVisible(uiOpen)
+end)
+OpenBtn.MouseButton1Click:Connect(function()
     UI:Toggle()
 end)
 
@@ -179,15 +178,14 @@ Farm:Toggle{
     end
 }
 
-local Quit = Main:Divider{ Name = "Configurações" }
-
-Quit:Button{
-    Name = "Fechar Script",
+Actions:Button{
+    Name = "Close UI",
     Callback = function()
-        ScreenGui:Destroy()
-        UI:Quit{ Message = "Encerrado", Length = 1 }
+        uiOpen = false
+        UI:SetVisible(false)
     end
 }
+
 
 if MainData.AutoFarm then
     task.spawn(Init)
