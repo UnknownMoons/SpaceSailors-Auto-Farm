@@ -1,15 +1,15 @@
 if not game:IsLoaded() then game.Loaded:Wait() end
 if game.GameId ~= 1722988797 then
-    error("This script only works for Space Sailors.")
+    error("this isnt space sailors code wont run")
     return
 end
 
 local http = game:GetService("HttpService")
-local FileName = "Save.JSON"
+local FileName = "SS.JSON"
 
 -- Função para carregar a lógica principal do Farm
 local Init = function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/UnknownMoons/SpaceSailors-Auto-Farm/refs/heads/main/AutoFarm-v1.0.0.lua"))()
+    loadstring(game:HttpGet('https://raw.githubusercontent.com/Nikev2/SpaceSailors/refs/heads/main/v2.lua'))()
 end
 
 -- Gerenciamento de Dados JSON
@@ -69,10 +69,11 @@ end)
 
 -- [ CONTEÚDO DA GUI ]
 local Main = UI:Tab{ Name = "Space Sailors" }
-Main:Label{ Text = "Versão: 1.0.0 | Status: Active" }
+
+-- CORREÇÃO AQUI: Mudado de Label para Section
+Main:Section{ Name = "Versão: 1.0.0 | Status: Ativo" }
 
 local Divider = Main:Divider{ Name = "Auto Farm" }
-local QuitDivider = Main:Divider{ Name = "Quit" }
 
 Divider:Toggle{
     Name = "Auto Farm",
@@ -84,13 +85,14 @@ Divider:Toggle{
     end
 }
 
--- Botão para fechar o script e destruir a UI
+local QuitDivider = Main:Divider{ Name = "Quit" }
+
 QuitDivider:Button{
    Name = "Close Script",
    Callback = function()
-       ScreenGui:Destroy() -- Remove o botão flutuante
+       ScreenGui:Destroy()
        UI:Quit{
-           Message = "Close",
+           Message = "Desligando...",
            Length = 1
        }
    end
@@ -98,5 +100,5 @@ QuitDivider:Button{
 
 -- Execução inicial se o AutoFarm estiver ligado
 if AutoFarm then
-    Init()
+    task.spawn(Init)
 end
