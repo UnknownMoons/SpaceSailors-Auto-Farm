@@ -7,12 +7,10 @@ end
 local http = game:GetService("HttpService")
 local FileName = "Save.JSON"
 
--- Função para carregar a lógica principal do Farm
 local Init = function()
     loadstring(game:HttpGet('https://raw.githubusercontent.com/UnknownMoons/SpaceSailors-Auto-Farm/refs/heads/main/AutoFarm-v1.0.0.lua'))()
 end
 
--- Gerenciamento de Dados JSON
 if not isfile(FileName) then
     local DefaultData = {AutoFarm = false, CameFromPlanet = false}
     writefile(FileName, http:JSONEncode(DefaultData))
@@ -27,7 +25,6 @@ function SaveData()
     Init()
 end
 
--- Carregamento da Library
 local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/7yhx/kwargs_Ui_Library/main/source.lua"))()
 
 local UI = Lib:Create{
@@ -35,7 +32,6 @@ local UI = Lib:Create{
    Size = UDim2.new(0, 555, 0, 400)
 }
 
--- [ CRIAÇÃO DO BOTÃO FLUTUANTE ]
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
 local OpenBtn = Instance.new("TextButton", ScreenGui)
 OpenBtn.Size = UDim2.new(0, 50, 0, 50)
@@ -47,7 +43,6 @@ OpenBtn.TextSize = 25
 local corner = Instance.new("UICorner", OpenBtn)
 corner.CornerRadius = UDim.new(0, 12)
 
--- Tornar o botão arrastável
 local dragging, dragStart, startPos
 OpenBtn.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -62,22 +57,21 @@ game:GetService("UserInputService").InputChanged:Connect(function(input)
 end)
 OpenBtn.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
 
--- Abrir/Fechar com o clique
 OpenBtn.MouseButton1Click:Connect(function()
     UI:Toggle()
 end)
 
--- [ CONTEÚDO DA GUI ]
+-- [ CONTEÚDO CORRIGIDO ]
 local Main = UI:Tab{ Name = "Space Sailors" }
 
--- CORREÇÃO AQUI: Mudado de Label para Section
-Main:Section{ Name = "Versão: 1.0.0 | Status: Active" }
+-- Na kwargs, você usa o nome do Divider para passar informações ou usa Section DENTRO do divider
+local InfoDivider = Main:Divider{ Name = "Info: v1.0.0 | Status: Active" }
 
-local Divider = Main:Divider{ Name = "Auto Farm" }
+local FarmDivider = Main:Divider{ Name = "Auto Farm" }
 
-Divider:Toggle{
-    Name = "Auto Farm",
-    Description = "Don't spam it - wait for the cycle to complete",
+FarmDivider:Toggle{
+    Name = "Ativar Farm",
+    Description = "Aguarde o ciclo completar",
     State = AutoFarm,
     Callback = function(state)
         MainData.AutoFarm = state
@@ -85,20 +79,19 @@ Divider:Toggle{
     end
 }
 
-local QuitDivider = Main:Divider{ Name = "Quit" }
+local QuitDivider = Main:Divider{ Name = "Configurações" }
 
 QuitDivider:Button{
-   Name = "Close Script",
+   Name = "Fechar Script",
    Callback = function()
        ScreenGui:Destroy()
        UI:Quit{
-           Message = "Close",
+           Message = "Encerrando...",
            Length = 1
        }
    end
 }
 
--- Execução inicial se o AutoFarm estiver ligado
 if AutoFarm then
     task.spawn(Init)
 end
