@@ -9,7 +9,7 @@ local FileName = "Save.JSON"
 
 -- Função para carregar a lógica principal do Farm
 local Init = function()
-    loadstring(game:HttpGet('https://raw.githubusercontent.com/UnknownMoons/SpaceSailors-Auto-Farm/refs/heads/main/AutoFarm-v1.0.0.lua'))()
+    loadstring(game:HttpGet('https://raw.githubusercontent.com'))()
 end
 
 -- Gerenciamento de Dados JSON
@@ -28,12 +28,74 @@ function SaveData()
 end
 
 -- Carregamento da Library
-local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/7yhx/kwargs_Ui_Library/main/source.lua"))()
+local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com"))()
 
 local UI = Lib:Create{
    Theme = "Dark",
    Size = UDim2.new(0, 555, 0, 400)
 }
+
+-- [ BOTÃO FLUTUANTE ]
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+local OpenBtn = Instance.new("TextButton", ScreenGui)
+OpenBtn.Size = UDim2.new(0, 50, 0, 50)
+OpenBtn.Position = UDim2.new(0, 10, 0.5, 0)
+OpenBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+OpenBtn.Text = "🚀"
+OpenBtn.TextColor3 = Color3.new(1, 1, 1)
+OpenBtn.TextSize = 25
+Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(0, 12)
+
+-- Arrastar botão
+local dragging, dragStart, startPos
+OpenBtn.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true; dragStart = input.Position; startPos = OpenBtn.Position
+    end
+end)
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
+        local delta = input.Position - dragStart
+        OpenBtn.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+OpenBtn.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
+
+OpenBtn.MouseButton1Click:Connect(function() UI:Toggle() end)
+
+-- [ CONTEÚDO DA GUI CORRIGIDO ]
+local Main = UI:Tab{ Name = "Space Sailors" }
+
+-- PRIMEIRO: Criar o Divider
+local MainDivider = Main:Divider{ Name = "Configurações Gerais" }
+
+-- DEPOIS: Adicionar elementos AO DIVIDER (não à Tab)
+MainDivider:Section{ Name = "Versão: 1.0.0 | Status: Active" }
+
+MainDivider:Toggle{
+    Name = "Auto Farm",
+    Description = "Aguarde o ciclo terminar antes de desativar",
+    State = AutoFarm,
+    Callback = function(state)
+        MainData.AutoFarm = state
+        SaveData()
+    end
+}
+
+local ActionDivider = Main:Divider{ Name = "Ações" }
+
+ActionDivider:Button{
+   Name = "Fechar Script",
+   Callback = function()
+       ScreenGui:Destroy()
+       UI:Quit{ Message = "Encerrado", Length = 1 }
+   end
+}
+
+-- Execução inicial
+if AutoFarm then
+    task.spawn(Init)
+end
 
 -- [ CRIAÇÃO DO BOTÃO FLUTUANTE ]
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
