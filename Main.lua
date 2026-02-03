@@ -9,7 +9,7 @@ local FileName = "Save.JSON"
 
 -- Função para carregar a lógica principal do Farm
 local Init = function()
-    loadstring(game:HttpGet('https://raw.githubusercontent.com/UnknownMoons/SpaceSailors-Auto-Farm/refs/heads/main/AutoFarm-v1.0.0.lua'))()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/UnknownMoons/SpaceSailors-Auto-Farm/refs/heads/main/AutoFarm-v1.0.0.lua"))()
 end
 
 -- Gerenciamento de Dados JSON
