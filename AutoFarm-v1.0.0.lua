@@ -1,5 +1,4 @@
 local TeleportService = game:GetService("TeleportService")
-local http = game:GetService("HttpService")
 
 function SendNotif(title, text, delay)
     game.StarterGui:SetCore("SendNotification", {Title = title, Text = text, Duration = delay})
@@ -32,16 +31,17 @@ _G.Connections = {}
 local Collected = false
 local FileName = "Save.JSON"
 local plr = game.Players.LocalPlayer
-local Char = plr.Character or plr.CharacterAdded:Wait()
+local Char = plr.Character
 local hum = Char:WaitForChild("Humanoid")
 
 local DefaultData = {
-    AutoFarm = true,
+    AutoFarm = false,
     CameFromPlanet = false
 }
 local MainData
 local AutoFarm
 local CameFromPlanet
+local http = game:GetService("HttpService")
 
 if game.GameId ~= 1722988797 then
     print("this isnt space sailors")
@@ -49,7 +49,8 @@ if game.GameId ~= 1722988797 then
 end
 
 if not isfile(FileName) then
-    writefile(FileName, http:JSONEncode(DefaultData))
+    local data = http:JSONEncode(DefaultData)
+    writefile(FileName, data)
     MainData = http:JSONDecode(readfile(FileName))
 else
     MainData = http:JSONDecode(readfile(FileName))
@@ -58,28 +59,22 @@ else
 end
 
 function SaveData()
-    if isfile(FileName) then delfile(FileName) end
-    writefile(FileName, http:JSONEncode(MainData))
+    local data = http:JSONEncode(MainData)
+    delfile(FileName)
+    writefile(FileName, data)
     MainData = http:JSONDecode(readfile(FileName))
 end
 
-if not game:IsLoaded() then game.Loaded:Wait() end
-if AutoFarm == false then
-    print("wont autofarm")
-    return false
-end
 
-if game.PlaceId == 5000143962 then 
-    MainData.CameFromPlanet = false
-    SaveData()
-    TpToGateway()
-    return
-end
+
+if not game:IsLoaded() then game.Loaded:Wait() end
+
 
 local Planets = {
     [5534753074] = {
         {"LanderAscentStage", "Lunar", " Sample", "Lander2", "GatewayRemote"},
-        {"LLAMA", "Lunar", " Sample", "LLAMA", "GatewayRemote"}
+        {"LLAMA", "Lunar", " Sample", "LLAMA", "GatewayRemote"},
+        {"AftCargoHold", "Lunar", " Sample", "LLAMA", "GatewayRemote"},
     }
 } 
 
@@ -87,12 +82,25 @@ local SpecialLanders = {
     [5515926734] = {"LLAMA", "ToMoonRemote"}
 }
 
-local function Get_Names() return Planets[game.PlaceId] or false end
+local function Get_Names()
+    return Planets[game.PlaceId] or false
+end
 
 local function GetSpecialLanderName()
     for id, name in pairs(SpecialLanders) do
-        if game.PlaceId == id then return name end
+        if game.PlaceId == id then
+            return name
+        end
     end
+end
+
+local function SpecialLanderOwnership()
+    for _, val in pairs(GetChildrenOfClass(Char, "BoolValue")) do
+        if string.find(val.Name, "Access") then 
+            return val.Value
+        end
+    end
+    return false
 end
 
 local Cashout = game:GetService("ReplicatedStorage"):FindFirstChild("Cashout")
@@ -100,16 +108,33 @@ if Cashout then
     Cashout:FireServer()
     SendNotif('Cashout Success', 'Cashed out', 3) 
 end
-
+if AutoFarm==false then
+    print("wont autofarm")
+    return false
+end
+if game.PlaceId == 5000143962 then 
+    MainData.CameFromPlanet = false
+    SaveData()
+    TpToGateway()
+    return
+end
 local function GetSpecialLanderByRemote(RemoteName)
     for _, Name in pairs(SpecialLanders) do
-        if Name[2] == RemoteName then return Name end
+        if Name[2] == RemoteName then
+            return Name
+        end
     end
 end
 
 local function IsInOrbiter()
-    local OrbiterIds = { 5534753074 }
-    for _, id in pairs(OrbiterIds) do if game.PlaceId == id then return true end end
+    local OrbiterIds = {
+        5534753074 
+    }
+    for _, id in pairs(OrbiterIds) do
+        if game.PlaceId == id then
+            return true
+        end
+    end
     return false
 end
 
@@ -122,33 +147,39 @@ else
     MainData.CameFromPlanet = false
     SaveData()
 end
-
-task.wait(3)
-
+wait(3)
 if not Get_Names() then
     if IsInOrbiter() == false and IsInGateway() == true then
         local t = {}
-        for _, Table in pairs(SpecialLanders) do table.insert(t, Table[2]) end
+        for _, Table in pairs(SpecialLanders) do
+           table.insert(t, Table[2])
+        end
         local RemoteName = t[math.random(1, #t)]
         local CustomLander = GetSpecialLanderByRemote(tostring(RemoteName))[1]
         game.ReplicatedStorage[RemoteName]:FireServer(CustomLander)
     else
-        local spec = GetSpecialLanderName()
-        if spec then game.ReplicatedStorage[spec[2]]:FireServer(spec[1]) end
+        game.ReplicatedStorage[GetSpecialLanderName()[2]]:FireServer(GetSpecialLanderName()[1])
     end
     return
 end 
 
-local function IsMultipleLanderOption() return typeof(Get_Names()[1]) == "table" end
+local function IsMultipleLanderOption()
+    return typeof(Get_Names()[1]) == "table"
+end
 
 local function GetLander()
-    if _G.lander and _G.PlanetInstanceNames then return _G.lander end
+    if _G.lander and _G.PlanetInstanceNames then 
+        return _G.lander 
+    end
+
     for _, l in pairs(GetChildrenOfClass(workspace, "Model")) do
         if IsMultipleLanderOption() then 
             for _, LanderOption in pairs(Get_Names()) do
-                if l.Name == LanderOption[4] and l:FindFirstChild("LanderOwner") and l.LanderOwner.Value == plr.Name then
+                if l.Name == LanderOption[4] and l:FindFirstChild("LanderOwner").Value == plr.Name then
+                    
                     _G.lander = l 
                     _G.PlanetInstanceNames = LanderOption
+                    
                     return _G.lander
                 end
             end
@@ -158,58 +189,46 @@ end
 
 local function GetTool()
     for _, v in pairs(plr.Backpack:GetChildren()) do
-        if v.Name:sub(1, 7) == "Pick Up" then return v end 
+        if v.Name:sub(1, 7) == "Pick Up" then
+            return v
+        end 
     end
 end
 
-local function GetNames() return _G.PlanetInstanceNames end
+local function GetNames() 
+    return _G.PlanetInstanceNames
+end
+
 local function GetPrompt() 
-    local ldr = GetLander()
-    local names = _G.PlanetInstanceNames
-    if ldr and names then
-        local target = ldr:FindFirstChild(names[1]) -- Evita erro de index nil
-        if target and target:FindFirstChild("Deposit") then
-            return target.Deposit.ProximityPrompt
-        end
-    end
+    return GetLander()[GetNames()[1]].Deposit.ProximityPrompt 
 end
-
--- NOVA FUNÇÃO DE TELEPORTE (5 STUDS + LOOK AT)
-local function QuickTpToPrompt(prompt)
-    if not prompt or not prompt.Parent then return end
-    
-    local targetPos = prompt.Parent.Position
-    local char = plr.Character
-    local root = char and char:FindFirstChild("HumanoidRootPart")
-    local camera = workspace.CurrentCamera
-    
-    if not root then return end
-    
-    -- Se for a LLAMA, garante que não estás sentado
-    if GetLander().Name == "LLAMA" then 
-        local humanoid = char:FindFirstChild("Humanoid")
-        if humanoid then humanoid.Sit = false end 
+local function GetPrompt2()
+    local val=false
+    if GetLander().Name == "LLAMA" then
+        val=GetLander()[GetNames()[1]].Deposit.ProximityPrompt 
     end
-    local offsetPos = targetPos + Vector3.new(0, 0, 0) 
-    root.CFrame = CFrame.new(offsetPos, targetPos)
-    camera.CFrame = CFrame.new(camera.CFrame.Position, targetPos)
-    plr.CameraMode = Enum.CameraMode.LockFirstPerson
+    return val
 end
 
 function CollectSamples()
     local Prompt = GetPrompt()
+    
     local Tool = GetTool()
-    if not Tool then return end
     local PickUp = Tool.PickUp
     local AmountStored = Prompt.Parent.Parent.Parent.ResourceValues.Storage
     local Capacity = AmountStored.Parent.Capacity
     
     repeat
-        QuickTpToPrompt(Prompt)
+        if GetLander().Name == "LLAMA" then
+            hum.Sit = false
+        end
         PickUp:FireServer()
-        local start = tick()
-        while task.wait() do if Collected or (tick() - start > 2) then break end end
-        task.wait(0.1)
+        
+        while task.wait() do
+            if Collected then break end
+        end
+        
+        task.wait()
         Collected = false
     until AmountStored.Value >= Capacity.Value 
     
@@ -218,31 +237,58 @@ function CollectSamples()
     game:GetService("ReplicatedStorage")[GetNames()[5]]:FireServer(plr.Name)
 end
 
-local Warp = game.ReplicatedStorage:FindFirstChild("WarpLandRemote", true)
-if Warp then Warp:FireServer(plr.Name) end
+local Warp
+for _, v in pairs(game.ReplicatedStorage:GetDescendants()) do
+    if v.Name == "WarpLandRemote" then
+        Warp = v.Parent:FindFirstChild(v.Name)
+        break
+    end
+end
+
+if Warp then
+    Warp:FireServer(plr.Name)
+end
 
 SendNotif('Waiting to land', 'autofarm will begin when you land', 5)
 
-local ldr = GetLander()
-if ldr and ldr:FindFirstChild("Landed") then
-    if not ldr.Landed.Value then ldr.Landed:GetPropertyChangedSignal("Value"):Wait() end
+local function QuickTpToPrompt(Prompt)
+    local AmountStored = Prompt.Parent.Parent.Parent.ResourceValues.Storage
+    local Capacity = AmountStored.Parent.Capacity
+     spawn(function() 
+        if GetLander().Name == "LLAMA" then
+        repeat
+        task.wait()
+        Char.HumanoidRootPart.CFrame = Prompt.Parent.CFrame
+        until AmountStored.Value >= Capacity.Value  
+        end
+     end)
 end
 
-SendNotif('Autofarming', 'Iniciado!', 5)
-task.wait(1)
+local landed = GetLander().Landed
+if not landed.Value then 
+    landed:GetPropertyChangedSignal("Value"):Wait()
+end
 
-local function RockAdded()
-    local names = GetNames()
-    if not names then return end
-    local Rock = plr.Backpack:FindFirstChild(names[2] .. names[3])
+SendNotif('Autofarming', 'started to autofarm', 5)
+--fireproximityprompt
+
+QuickTpToPrompt(GetPrompt())
+
+
+
+local function AutoFarm()
+
+    local Prompt=GetPrompt()
+    local Rock = plr.Backpack:FindFirstChild(GetNames()[2] .. GetNames()[3])
     if not Rock then return end
-    
     hum:EquipTool(Rock)
-    task.wait(0.2)
-    fireproximityprompt(GetPrompt())
+    if GetLander().Name == "LLAMA" then
+        Prompt = GetPrompt2()
+    end
+    fireproximityprompt(Prompt)
+    
     Collected = true 
 end
 
-table.insert(_G.Connections, plr.Backpack.ChildAdded:Connect(RockAdded))
+table.insert(_G.Connections, plr.Backpack.ChildAdded:Connect(AutoFarm))
 CollectSamples()
-
