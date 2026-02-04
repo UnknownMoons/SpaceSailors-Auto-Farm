@@ -163,7 +163,16 @@ local function GetTool()
 end
 
 local function GetNames() return _G.PlanetInstanceNames end
-local function GetPrompt() return GetLander()[GetNames()[1]].Deposit.ProximityPrompt end
+local function GetPrompt() 
+    local ldr = GetLander()
+    local names = _G.PlanetInstanceNames
+    if ldr and names then
+        local target = ldr:FindFirstChild(names[1]) -- Evita erro de index nil
+        if target and target:FindFirstChild("Deposit") then
+            return target.Deposit.ProximityPrompt
+        end
+    end
+end
 
 -- NOVA FUNÇÃO DE TELEPORTE (5 STUDS + LOOK AT)
 local function QuickTpToPrompt(prompt)
