@@ -174,8 +174,7 @@ local function QuickTpToPrompt(prompt)
     
     if GetLander().Name == "LLAMA" then hum.Sit = false end
     
-    -- Posiciona a 5 studs de distância e olha para o depósito
-    root.CFrame = CFrame.new(targetPos + Vector3.new(0, 2, 5), targetPos)
+    root.CFrame = CFrame.new(targetPos + Vector3.new(0, 0, 1), targetPos)
 end
 
 function CollectSamples()
