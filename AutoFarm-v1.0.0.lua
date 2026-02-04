@@ -35,7 +35,7 @@ local Char = plr.Character
 local hum = Char:WaitForChild("Humanoid")
 
 local DefaultData = {
-    AutoFarm = false,
+    AutoFarm = true,
     CameFromPlanet = false
 }
 local MainData
