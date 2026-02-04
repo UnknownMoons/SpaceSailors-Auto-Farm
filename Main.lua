@@ -1,8 +1,9 @@
 if not game:IsLoaded() then game.Loaded:Wait() end
-if game.GameId~=1722988797 then
+if game.GameId~=1722988797  then
     error("this isnt space sailors code wont run")
     return
 end
+
 local http=game:GetService("HttpService")
 if not game:IsLoaded() then game.Loaded:Wait() end
 local Init=function()
@@ -25,6 +26,7 @@ function SaveData()
     writefile(FileName,data)
     MainData=http:JSONDecode(readfile(FileName))
     Init()
+    print("saved")
 end
 
 
@@ -34,6 +36,42 @@ local UI = Lib:Create{
 }
 local Main = UI:Tab{
    Name = "Space Sailors"
+}
+local Divider = Main:Divider{
+   Name = "Auto Farm"
+}
+local QuitDivider = Main:Divider{
+   Name = "Quit"
+}
+local autofarm=Divider:Toggle{
+    Name="Auto Farm",
+    Description="If disabled wait for the current auto farm to complete",
+    State=MainData.AutoFarm,
+    Callback=function(state)
+        
+
+        MainData.AutoFarm=state
+        local data=http:JSONEncode(MainData)
+        delfile(FileName)
+        writefile(FileName,data)
+        MainData=http:JSONDecode(readfile(FileName))
+        Init()
+        print("saved")
+        Init()
+        
+    end
+}
+local Quit = QuitDivider:Button{
+   Name = "Close Ui",
+   Callback = function()
+       UI:Quit{
+           Message = "Closed", -- closing message
+           Length = 1 -- seconds the closing message shows for
+       }
+   end
+}
+Init()
+
 }
 local Divider = Main:Divider{
    Name = "Auto Farm"
