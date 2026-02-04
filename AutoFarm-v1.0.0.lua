@@ -168,13 +168,23 @@ local function GetPrompt() return GetLander()[GetNames()[1]].Deposit.ProximityPr
 -- NOVA FUNÇÃO DE TELEPORTE (5 STUDS + LOOK AT)
 local function QuickTpToPrompt(prompt)
     if not prompt or not prompt.Parent then return end
+    
     local targetPos = prompt.Parent.Position
-    local root = plr.Character:FindFirstChild("HumanoidRootPart")
+    local char = plr.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    local camera = workspace.CurrentCamera
+    
     if not root then return end
     
-    if GetLander().Name == "LLAMA" then hum.Sit = false end
-    
-    root.CFrame = CFrame.new(targetPos + Vector3.new(0, 0, 1), targetPos)
+    -- Se for a LLAMA, garante que não estás sentado
+    if GetLander().Name == "LLAMA" then 
+        local humanoid = char:FindFirstChild("Humanoid")
+        if humanoid then humanoid.Sit = false end 
+    end
+    local offsetPos = targetPos + Vector3.new(0, 0, 0) 
+    root.CFrame = CFrame.new(offsetPos, targetPos)
+    camera.CFrame = CFrame.new(camera.CFrame.Position, targetPos)
+    plr.CameraMode = Enum.CameraMode.LockFirstPerson
 end
 
 function CollectSamples()
