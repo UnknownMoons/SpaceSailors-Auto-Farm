@@ -72,35 +72,3 @@ local Quit = QuitDivider:Button{
 }
 Init()
 
-}
-local Divider = Main:Divider{
-   Name = "Auto Farm"
-}
-local QuitDivider = Main:Divider{
-   Name = "Quit"
-}
-local autofarm=Divider:Toggle{
-    Name="Auto Farm",
-    Description="Don't spam it, if disabled wait for the current auto farm to complete",
-    State=AutoFarm,
-    Callback=function(state)
-        if state then
-            MainData.AutoFarm=true
-            SaveData()
-        else
-            MainData.AutoFarm=false
-            SaveData()
-        end
-        
-    end
-}
-local Quit = QuitDivider:Button{
-   Name = "Close Ui",
-   Callback = function()
-       UI:Quit{
-           Message = "Closed", -- closing message
-           Length = 1 -- seconds the closing message shows for
-       }
-   end
-}
-Init()
