@@ -33,6 +33,7 @@ local FileName = "Save.JSON"
 local plr = game.Players.LocalPlayer
 local Char = plr.Character
 local hum = Char:WaitForChild("Humanoid")
+local root = Char:WaitForChild("HumanoidRootPart")
 
 local DefaultData = {
     AutoFarm = true,
