@@ -183,7 +183,9 @@ local function QuickTpToPrompt(prompt)
         task.wait(1)
     end
     
-    root.CFrame = CFrame.lookAt(targetPos + Vector3.new(0,0,1), targetPos)
+    -- Ajuste para garantir que o personagem olhe para o prompt
+    root.CFrame = CFrame.new(targetPos + Vector3.new(0, 2, 3), targetPos)
+    return targetPos, root -- Retornamos para usar na função principal
 end
 
 function CollectSamples()
@@ -195,10 +197,17 @@ function CollectSamples()
     local Capacity = AmountStored.Parent.Capacity
     
     repeat
-        QuickTpToPrompt(Prompt)
-        root.CFrame = CFrame.lookAt(targetPos)
-        PickUp:FireServer()
-        local start = tick() 
+        -- Atualizamos as variáveis locais chamando a função de teleporte
+        local targetPos, root = QuickTpToPrompt(Prompt)
+        
+        if root and targetPos then
+            root.CFrame = CFrame.lookAt(root.Position, targetPos)
+            PickUp:FireServer()
+        end
+
+        local start = tick()
+        while task.wait() do 
+            if Collected or (tick() - start > 2) then break end 
         end
         task.wait(0.1)
         Collected = false
@@ -206,10 +215,10 @@ function CollectSamples()
     
     MainData.CameFromPlanet = true
     SaveData()
-    StopLockCamera()
     SendNotif("Autofarm Complete", "Storage full. Returning to the Gateway.", 5)
     game:GetService("ReplicatedStorage")[GetNames()[5]]:FireServer(plr.Name)
 end
+
 
 local Warp = game.ReplicatedStorage:FindFirstChild("WarpLandRemote", true)
 if Warp then Warp:FireServer(plr.Name) end
