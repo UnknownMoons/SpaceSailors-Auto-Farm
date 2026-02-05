@@ -1,5 +1,6 @@
 local TeleportService = game:GetService("TeleportService")
 local http = game:GetService("HttpService")
+local RunService = game:GetService("RunService")
 
 function SendNotif(title, text, delay)
     game.StarterGui:SetCore("SendNotification", {Title = title, Text = text, Duration = delay})
@@ -10,6 +11,7 @@ function IsInGateway()
 end
 
 function TpToGateway()
+    SendNotif("Warping", "Returning to the Gateway...", 4)
     TeleportService:Teleport(5515926734)
 end
 
@@ -35,6 +37,11 @@ local plr = game.Players.LocalPlayer
 local Char = plr.Character or plr.CharacterAdded:Wait()
 local hum = Char:WaitForChild("Humanoid")
 
+plr.CharacterAdded:Connect(function(newChar)
+    Char = newChar
+    hum = newChar:WaitForChild("Humanoid")
+end)
+
 local DefaultData = {
     AutoFarm = false,
     CameFromPlanet = false
@@ -44,7 +51,7 @@ local AutoFarm
 local CameFromPlanet
 
 if game.GameId ~= 1722988797 then
-    print("this isnt space sailors")
+    warn("This is not Space Sailors.")
     return
 end
 
@@ -65,7 +72,7 @@ end
 
 if not game:IsLoaded() then game.Loaded:Wait() end
 if AutoFarm == false then
-    print("wont autofarm")
+    SendNotif("Autofarm Disabled", "Enable autofarm in your settings to start collecting samples.", 5)
     return false
 end
 
@@ -98,7 +105,7 @@ end
 local Cashout = game:GetService("ReplicatedStorage"):FindFirstChild("Cashout")
 if Cashout then 
     Cashout:FireServer()
-    SendNotif('Cashout Success', 'Cashed out', 3) 
+    SendNotif("Cashout Complete", "Your resources have been successfully cashed out.", 4)
 end
 
 local function GetSpecialLanderByRemote(RemoteName)
@@ -165,19 +172,36 @@ end
 local function GetNames() return _G.PlanetInstanceNames end
 local function GetPrompt() return GetLander()[GetNames()[1]].Deposit.ProximityPrompt end
 
--- NOVA FUNÇÃO DE TELEPORTE (5 STUDS + LOOK AT)
+-- 📷 CAMERA LOCK
+local cam = workspace.CurrentCamera
+local CamConnection
+
+local function StartLockCamera(targetPos)
+    cam = workspace.CurrentCamera
+    cam.CameraType = Enum.CameraType.Scriptable
+    if CamConnection then CamConnection:Disconnect() end
+    CamConnection = RunService.RenderStepped:Connect(function()
+        if cam then
+            cam.CFrame = CFrame.new(cam.CFrame.Position, targetPos)
+        end
+    end)
+end
+
+local function StopLockCamera()
+    if CamConnection then CamConnection:Disconnect() CamConnection = nil end
+    if cam then cam.CameraType = Enum.CameraType.Custom end
+end
+
 local function QuickTpToPrompt(prompt)
     if not prompt or not prompt.Parent then return end
     local targetPos = prompt.Parent.Position
-    local root = plr.Character:FindFirstChild("HumanoidRootPart")
+    local root = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
     if not root then return end
-    
+
     if GetLander().Name == "LLAMA" then hum.Sit = false end
-    
-    -- Posiciona a 5 studs de distância e olha para o depósito
+
     root.CFrame = CFrame.new(targetPos + Vector3.new(0, 0, 1), targetPos)
-    task.wait(30)
-    cam.CFrame = CFrame.new(cam.CFrame.Position, targetPos)
+    StartLockCamera(targetPos)
 end
 
 function CollectSamples()
@@ -192,27 +216,31 @@ function CollectSamples()
         QuickTpToPrompt(Prompt)
         PickUp:FireServer()
         local start = tick()
-        while task.wait() do if Collected or (tick() - start > 2) then break end end
+        while task.wait() do 
+            if Collected or (tick() - start > 2) then break end 
+        end
         task.wait(0.1)
         Collected = false
     until AmountStored.Value >= Capacity.Value 
     
     MainData.CameFromPlanet = true
     SaveData()
+    StopLockCamera()
+    SendNotif("Autofarm Complete", "Storage full. Returning to the Gateway.", 5)
     game:GetService("ReplicatedStorage")[GetNames()[5]]:FireServer(plr.Name)
 end
 
 local Warp = game.ReplicatedStorage:FindFirstChild("WarpLandRemote", true)
 if Warp then Warp:FireServer(plr.Name) end
 
-SendNotif('Waiting to land', 'autofarm will begin when you land', 5)
+SendNotif("Preparing Autofarm", "Waiting for your lander to touch down...", 5)
 
 local ldr = GetLander()
 if ldr and ldr:FindFirstChild("Landed") then
     if not ldr.Landed.Value then ldr.Landed:GetPropertyChangedSignal("Value"):Wait() end
 end
 
-SendNotif('Autofarming', 'Iniciado!', 5)
+SendNotif("Autofarm Started", "Collecting samples automatically. Sit back and relax.", 5)
 task.wait(1)
 
 local function RockAdded()
@@ -229,4 +257,3 @@ end
 
 table.insert(_G.Connections, plr.Backpack.ChildAdded:Connect(RockAdded))
 CollectSamples()
-
