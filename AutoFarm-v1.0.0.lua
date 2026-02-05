@@ -196,11 +196,9 @@ function CollectSamples()
     
     repeat
         QuickTpToPrompt(Prompt)
-        root.CFrame = CFrame.lookAt(root.Position, targetPos)
+        root.CFrame = CFrame.lookAt(targetPos)
         PickUp:FireServer()
-        local start = tick()
-        while task.wait() do 
-            if Collected or (tick() - start > 2) then break end 
+        local start = tick() 
         end
         task.wait(0.1)
         Collected = false
