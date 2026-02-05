@@ -176,6 +176,8 @@ local function QuickTpToPrompt(prompt)
     
     -- Posiciona a 5 studs de distância e olha para o depósito
     root.CFrame = CFrame.new(targetPos + Vector3.new(0, 0, 1), targetPos)
+    task.wait(30)
+    cam.CFrame = CFrame.new(cam.CFrame.Position, targetPos)
 end
 
 function CollectSamples()
