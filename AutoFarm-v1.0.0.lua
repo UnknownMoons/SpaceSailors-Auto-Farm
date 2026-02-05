@@ -175,7 +175,7 @@ local function GetPrompt() return GetLander()[GetNames()[1]].Deposit.ProximityPr
 local cam = workspace.CurrentCamera
 local CamConnection
 
-local function StartLockCamera(targetPos)
+local function StartLockCamera()
     local head = plr.Character and plr.Character:FindFirstChild("Head")
     if not head then return end
 
@@ -185,10 +185,7 @@ local function StartLockCamera(targetPos)
     CamConnection = RunService.RenderStepped:Connect(function()
         if not head or not cam then return end
 
-        -- posição da câmera: cabeça do jogador (ligeiramente acima)
-        local camPos = head.Position + Vector3.new(0, 0.5, 0)
-        -- trava a câmera olhando para o target
-        cam.CFrame = CFrame.new(camPos, targetPos)
+        local camPos = head.Position + Vector3.new(0, 0, 0)
     end)
 end
 
@@ -206,8 +203,7 @@ local function QuickTpToPrompt(prompt)
     if GetLander().Name == "LLAMA" then hum.Sit = false end
 
     root.CFrame = CFrame.new(targetPos + Vector3.new(0, 0, 1), targetPos)
-    task.wait(5)
-    StartLockCamera(targetPos)
+    StartLockCamera()
 end
 
 function CollectSamples()
