@@ -185,7 +185,7 @@ local function StartLockCamera()
     CamConnection = RunService.RenderStepped:Connect(function()
         if not head or not cam then return end
 
-        local camPos = head.Position + Vector3.new(0, 0, 0)
+        local camPos = Vector3.new(0, 0, 0)
     end)
 end
 
