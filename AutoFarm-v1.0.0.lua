@@ -206,6 +206,7 @@ local function QuickTpToPrompt(prompt)
     if GetLander().Name == "LLAMA" then hum.Sit = false end
 
     root.CFrame = CFrame.new(targetPos + Vector3.new(0, 0, 1), targetPos)
+    task.wait(5)
     StartLockCamera(targetPos)
 end
 
