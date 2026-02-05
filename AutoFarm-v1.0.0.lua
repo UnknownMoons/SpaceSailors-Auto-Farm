@@ -172,18 +172,23 @@ end
 local function GetNames() return _G.PlanetInstanceNames end
 local function GetPrompt() return GetLander()[GetNames()[1]].Deposit.ProximityPrompt end
 
--- 📷 CAMERA LOCK
 local cam = workspace.CurrentCamera
 local CamConnection
 
 local function StartLockCamera(targetPos)
-    cam = workspace.CurrentCamera
+    local head = plr.Character and plr.Character:FindFirstChild("Head")
+    if not head then return end
+
     cam.CameraType = Enum.CameraType.Scriptable
+
     if CamConnection then CamConnection:Disconnect() end
     CamConnection = RunService.RenderStepped:Connect(function()
-        if cam then
-            cam.CFrame = CFrame.new(cam.CFrame.Position, targetPos)
-        end
+        if not head or not cam then return end
+
+        -- posição da câmera: cabeça do jogador (ligeiramente acima)
+        local camPos = head.Position + Vector3.new(0, 0.5, 0)
+        -- trava a câmera olhando para o target
+        cam.CFrame = CFrame.new(camPos, targetPos)
     end)
 end
 
