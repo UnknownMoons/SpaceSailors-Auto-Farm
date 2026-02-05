@@ -172,38 +172,18 @@ end
 local function GetNames() return _G.PlanetInstanceNames end
 local function GetPrompt() return GetLander()[GetNames()[1]].Deposit.ProximityPrompt end
 
-local cam = workspace.CurrentCamera
-local CamConnection
-
-local function StartLockCamera()
-    local head = plr.Character and plr.Character:FindFirstChild("Head")
-    if not head then return end
-
-    cam.CameraType = Enum.CameraType.Scriptable
-
-    if CamConnection then CamConnection:Disconnect() end
-    CamConnection = RunService.RenderStepped:Connect(function()
-        if not head or not cam then return end
-
-        local camPos = Vector3.new(0, 0, 0)
-    end)
-end
-
-local function StopLockCamera()
-    if CamConnection then CamConnection:Disconnect() CamConnection = nil end
-    if cam then cam.CameraType = Enum.CameraType.Custom end
-end
-
 local function QuickTpToPrompt(prompt)
     if not prompt or not prompt.Parent then return end
     local targetPos = prompt.Parent.Position
     local root = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
     if not root then return end
 
-    if GetLander().Name == "LLAMA" then hum.Sit = false end
-
-    root.CFrame = CFrame.new(targetPos + Vector3.new(0, 0, 1), targetPos)
-    StartLockCamera()
+    if GetLander().Name == "LLAMA" then
+        hum.Sit = false
+        task.wait(1)
+    end
+    
+    root.CFrame = CFrame.lookAt(targetPos + Vector3.new(0,0,1), targetPos)
 end
 
 function CollectSamples()
