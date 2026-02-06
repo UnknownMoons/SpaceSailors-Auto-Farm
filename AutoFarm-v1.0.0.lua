@@ -207,7 +207,7 @@ function CollectSamples()
         PickUp:FireServer()
         local start = tick()
         while task.wait() do 
-            if Collected or (tick() - start > 0.5) then break end 
+            if Collected or (tick() - start > 2) then break end 
         end
         Collected = false
         task.wait(0.1)
