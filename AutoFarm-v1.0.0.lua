@@ -176,17 +176,23 @@ local function QuickTpToPrompt(prompt)
     if not prompt or not prompt.Parent then return end
     local targetPos = prompt.Parent.Position
     local root = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
+    local camera = workspace.CurrentCamera
     if not root then return end
 
     if GetLander().Name == "LLAMA" then
         hum.Sit = false
-        task.wait(1)
+        task.wait(0.5)
     end
     
-    -- Ajuste para garantir que o personagem olhe para o prompt
-    root.CFrame = CFrame.new(targetPos + Vector3.new(0, 2, 3), targetPos)
-    return targetPos, root -- Retornamos para usar na função principal
+    root.CFrame = CFrame.lookAt(targetPos + Vector3.new(0, 0, 1), targetPos)
+    camera.CameraType = Enum.CameraType.Custom
+    task.wait(0.1) 
+     plr.CameraMode = Enum.CameraMode.LockFirstPerson
+    camera.CameraType = Enum.CameraType.Scriptable 
+    camera.CFrame = CFrame.lookAt(camera.Focus.Position, targetPos)
+    
 end
+
 
 function CollectSamples()
     local Prompt = GetPrompt()
@@ -197,20 +203,15 @@ function CollectSamples()
     local Capacity = AmountStored.Parent.Capacity
     
     repeat
-        -- Atualizamos as variáveis locais chamando a função de teleporte
-        local targetPos, root = QuickTpToPrompt(Prompt)
-        
-        if root and targetPos then
-            root.CFrame = CFrame.lookAt(root.Position, targetPos)
-            PickUp:FireServer()
-        end
-
+        QuickTpToPrompt(prompt)
+        PickUp:FireServer()
         local start = tick()
         while task.wait() do 
-            if Collected or (tick() - start > 2) then break end 
+            if Collected or (tick() - start > 0.5) then break end 
         end
         task.wait(0.1)
         Collected = false
+        RunService.Heartbeat:Wait()
     until AmountStored.Value >= Capacity.Value 
     
     MainData.CameFromPlanet = true
