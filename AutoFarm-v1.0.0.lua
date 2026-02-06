@@ -175,51 +175,43 @@ local function GetPrompt() return GetLander()[GetNames()[1]].Deposit.ProximityPr
 local function QuickTpToPrompt(prompt)
     if not prompt or not prompt.Parent then return end
     local targetPos = prompt.Parent.Position
-    local root = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
-    local camera = workspace.CurrentCamera
+    local root = Char:FindFirstChild("HumanoidRootPart")
     if not root then return end
 
-    if GetLander().Name == "LLAMA" then
-        hum.Sit = false
-        task.wait(0.5)
-    end
+    if GetLander().Name == "LLAMA" then hum.Sit = false task.wait(1) end
     
+    -- Configura Câmera Primeiro (Primeira Pessoa)
+    plr.CameraMode = Enum.CameraMode.LockFirstPerson
+    cam.CFrame = CFrame.lookAt(cam.Focus.Position, targetPos)
+    
+    -- Teleporta Personagem Olhando para o Alvo
     root.CFrame = CFrame.lookAt(targetPos + Vector3.new(0, 0, 1), targetPos)
-    camera.CameraType = Enum.CameraType.Custom
-    task.wait(0.1) 
-     plr.CameraMode = Enum.CameraMode.LockFirstPerson
-    camera.CameraType = Enum.CameraType.Scriptable 
-    camera.CFrame = CFrame.lookAt(camera.Focus.Position, targetPos)
-    
 end
-
 
 function CollectSamples()
     local Prompt = GetPrompt()
     local Tool = GetTool()
     if not Tool then return end
-    local PickUp = Tool.PickUp
+    
     local AmountStored = Prompt.Parent.Parent.Parent.ResourceValues.Storage
     local Capacity = AmountStored.Parent.Capacity
-    
+
     repeat
-        QuickTpToPrompt(prompt)
-        PickUp:FireServer()
+        QuickTpToPrompt(Prompt)
+        Tool.PickUp:FireServer()
+        
         local start = tick()
         while task.wait() do 
             if Collected or (tick() - start > 0.5) then break end 
         end
-        task.wait(0.1)
         Collected = false
-        RunService.Heartbeat:Wait()
+        task.wait(0.1)
     until AmountStored.Value >= Capacity.Value 
-    
+
     MainData.CameFromPlanet = true
     SaveData()
-    SendNotif("Autofarm Complete", "Storage full. Returning to the Gateway.", 5)
     game:GetService("ReplicatedStorage")[GetNames()[5]]:FireServer(plr.Name)
 end
-
 
 local Warp = game.ReplicatedStorage:FindFirstChild("WarpLandRemote", true)
 if Warp then Warp:FireServer(plr.Name) end
