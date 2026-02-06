@@ -175,31 +175,36 @@ local function GetPrompt() return GetLander()[GetNames()[1]].Deposit.ProximityPr
 local function QuickTpToPrompt(prompt)
     if not prompt or not prompt.Parent then return end
     local targetPos = prompt.Parent.Position
-    local root = Char:FindFirstChild("HumanoidRootPart")
+    local character = plr.Character
+    local root = character and character:FindFirstChild("HumanoidRootPart")
+    local camera = workspace.CurrentCamera
+    
     if not root then return end
 
-    if GetLander().Name == "LLAMA" then hum.Sit = false task.wait(1) end
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if humanoid and humanoid.Sit then 
+        humanoid.Sit = false 
+        task.wait(1)
+    end
     
-    -- Configura Câmera Primeiro (Primeira Pessoa)
     plr.CameraMode = Enum.CameraMode.LockFirstPerson
-    cam.CFrame = CFrame.lookAt(cam.Focus.Position, targetPos)
     
-    -- Teleporta Personagem Olhando para o Alvo
-    root.CFrame = CFrame.lookAt(targetPos + Vector3.new(0, 0, 1), targetPos)
+    local spawnPos = targetPos + Vector3.new(0, 0, 1) 
+    
+    root.CFrame = CFrame.lookAt(spawnPos, targetPos)
+    camera.CFrame = CFrame.lookAt(camera.CFrame.Position, targetPos)
 end
+
 
 function CollectSamples()
     local Prompt = GetPrompt()
     local Tool = GetTool()
-    if not Tool then return end
-    
+    local PickUp = Tool.PickUp
     local AmountStored = Prompt.Parent.Parent.Parent.ResourceValues.Storage
     local Capacity = AmountStored.Parent.Capacity
-
     repeat
         QuickTpToPrompt(Prompt)
-        Tool.PickUp:FireServer()
-        
+        PickUp:FireServer()
         local start = tick()
         while task.wait() do 
             if Collected or (tick() - start > 0.5) then break end 
