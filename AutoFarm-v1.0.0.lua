@@ -205,12 +205,11 @@ function CollectSamples()
     repeat
         QuickTpToPrompt(Prompt)
         PickUp:FireServer()
-        local start = tick()
-        while task.wait() do 
-            if Collected or (tick() - start > 2) then break end 
+        while task.wait() do
+            if Collected then break end
         end
         Collected = false
-        task.wait(0.1)
+        task.wait()
     until AmountStored.Value >= Capacity.Value 
 
     MainData.CameFromPlanet = true
